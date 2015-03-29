@@ -425,6 +425,10 @@ IB_DESIGNABLE @interface BEMSimpleLineGraphView : UIView <UIGestureRecognizerDel
  @return The prefix to prepend to the popup report. */
 - (NSString *)popUpPrefixForlineGraph:(BEMSimpleLineGraphView *)graph;
 
+- (NSString *)customValueForPermanentPopup:(NSInteger)index;
+
+
+
 
 /** Optional method to always display some of the pop up labels on the graph.
  @see alwaysDisplayPopUpLabels must be set to YES for this method to have any affect.

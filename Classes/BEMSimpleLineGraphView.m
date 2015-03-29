@@ -184,7 +184,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     dataPoints = [NSMutableArray array];
     xAxisLabels = [NSMutableArray array];
     yAxisValues = [NSMutableArray array];
-
+    
 }
 
 - (void)prepareForInterfaceBuilder {
@@ -219,7 +219,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         if ([self.delegate respondsToSelector:@selector(lineGraphDidFinishLoading:)])
             [self.delegate lineGraphDidFinishLoading:self];
     }
-
+    
 }
 
 - (void)layoutSubviews {
@@ -229,9 +229,9 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         return;
     }
     self.currentViewSize = self.bounds.size;
-
+    
     [self drawGraph];
-   
+    
 }
 
 
@@ -259,7 +259,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         if (self.delegate &&
             [self.delegate respondsToSelector:@selector(noDataLabelEnableForLineGraph:)] &&
             ![self.delegate noDataLabelEnableForLineGraph:self]) return;
-
+        
         NSLog(@"[BEMSimpleLineGraph] Data source contains no data. A no data label will be displayed and drawing will stop. Add data to the data source and then reload the graph.");
         
 #if !TARGET_INTERFACE_BUILDER
@@ -270,7 +270,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         
         self.noDataLabel.backgroundColor = [UIColor clearColor];
         self.noDataLabel.textAlignment = NSTextAlignmentCenter;
-
+        
 #if !TARGET_INTERFACE_BUILDER
         NSString *noDataText;
         if ([self.delegate respondsToSelector:@selector(noDataLabelTextForLineGraph:)]) {
@@ -282,7 +282,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
 #endif
         self.noDataLabel.font = self.noDataLabelFont ?: [UIFont fontWithName:@"HelveticaNeue-Light" size:15];
         self.noDataLabel.textColor = self.noDataLabelColor ?: self.colorLine;
-
+        
         [self.viewForBaselineLayout addSubview:self.noDataLabel];
         
         // Let the delegate know that the graph finished layout updates
@@ -432,19 +432,19 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             NSString *mString = [longestString stringByReplacingOccurrencesOfString:@"[0-9-]" withString:@"N" options:NSRegularExpressionSearch range:NSMakeRange(0, [longestString length])];
             NSString *fullString = [NSString stringWithFormat:@"%@%@%@", prefix, mString, suffix];
             self.YAxisLabelXOffset = [fullString sizeWithAttributes:attributes].width + 2;//MAX([maxValueString sizeWithAttributes:attributes].width + 10,
-                                     //    [minValueString sizeWithAttributes:attributes].width) + 5;
+            //    [minValueString sizeWithAttributes:attributes].width) + 5;
         } else {
             NSString *longestString = [NSString stringWithFormat:@"%i", (int)self.frame.size.height];
             self.YAxisLabelXOffset = [longestString sizeWithAttributes:attributes].width + 5;
         }
     } else self.YAxisLabelXOffset = 0;
-
+    
     // Draw the X-Axis
     [self drawXAxis];
-
+    
     // Draw the graph
     [self drawDots];
-
+    
     // Draw the Y-Axis
     if (self.enableYAxisLabel) [self drawYAxis];
 }
@@ -492,6 +492,8 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
 #else
             dotValue = (int)(arc4random() % 10000);
 #endif
+            
+            
             [dataPoints addObject:@(dotValue)];
             
             if (self.positionYAxisRight) {
@@ -507,7 +509,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             // If we're dealing with an null value, don't draw the dot
             
-            if (dotValue != BEMNullGraphValue) {
+            if (dotValue >= 0.0 && dotValue != BEMNullGraphValue  ) {
                 BEMCircle *circleDot = [[BEMCircle alloc] initWithFrame:CGRectMake(0, 0, self.sizePoint, self.sizePoint)];
                 circleDot.center = CGPointMake(positionOnXAxis, positionOnYAxis);
                 circleDot.tag = i+ DotFirstTag100;
@@ -550,7 +552,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
                     
                 }
             }
-
+            
         }
     }
     
@@ -914,7 +916,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         // Plot according to min-max range
         NSNumber *minimumValue;
         NSNumber *maximumValue;
-
+        
         minimumValue = [self calculateMinimumPointValue];
         maximumValue = [self calculateMaximumPointValue];
         
@@ -1034,13 +1036,13 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     }
     
     
-    [self didFinishDrawingIncludingYAxis:YES];  
+    [self didFinishDrawingIncludingYAxis:YES];
 }
 
 //Area on the graph that doesn't include the axes
 - (CGRect)drawableGraphArea {
     
-//    CGRectMake(xAxisXPositionFirstOffset, self.frame.size.height-20, viewWidth/2, 20);
+    //    CGRectMake(xAxisXPositionFirstOffset, self.frame.size.height-20, viewWidth/2, 20);
     NSInteger xAxisHeight = 20;
     CGFloat xOrigin = self.positionYAxisRight ? 0 : self.YAxisLabelXOffset;
     CGFloat viewWidth = self.frame.size.width - self.YAxisLabelXOffset;
@@ -1068,6 +1070,8 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
 }
 
 - (void)displayPermanentLabelForPoint:(BEMCircle *)circleDot {
+    int index = (int)(circleDot.tag - DotFirstTag100);
+    NSNumber *value = dataPoints[index];
     self.enablePopUpReport = NO;
     self.xCenterLabel = circleDot.center.x;
     
@@ -1079,61 +1083,73 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     NSString *suffix = @"";
     if ([self.delegate respondsToSelector:@selector(popUpSuffixForlineGraph:)])
         suffix = [self.delegate popUpSuffixForlineGraph:self];
-
+    
     if ([self.delegate respondsToSelector:@selector(popUpPrefixForlineGraph:)])
         prefix = [self.delegate popUpPrefixForlineGraph:self];
-
-    int index = (int)(circleDot.tag - DotFirstTag100);
-    NSNumber *value = dataPoints[index]; // @((NSInteger) circleDot.absoluteValue)
-    NSString *formattedValue = [NSString stringWithFormat:self.formatStringForValues, value.doubleValue];
-    permanentPopUpLabel.text = [NSString stringWithFormat:@"%@%@%@", prefix, formattedValue, suffix];
+    
+    if ([self.delegate respondsToSelector:@selector(customValueForPermanentPopup:)]) {
+        NSString *labelText = [self.delegate customValueForPermanentPopup:index];
+        permanentPopUpLabel.text  = labelText;
+        permanentPopUpLabel.numberOfLines = 0;
+    }else {
+        NSString *formattedValue = [NSString stringWithFormat:self.formatStringForValues, value.doubleValue];
+        permanentPopUpLabel.text = [NSString stringWithFormat:@"%@%@%@", prefix, formattedValue, suffix];
+    }
     
     permanentPopUpLabel.font = self.labelFont;
     permanentPopUpLabel.backgroundColor = [UIColor clearColor];
+    permanentPopUpLabel.textColor = [UIColor whiteColor];
     [permanentPopUpLabel sizeToFit];
-    permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y - circleDot.frame.size.height/2 - 15);
+    permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, 20);
     permanentPopUpLabel.alpha = 0;
     
-    BEMPermanentPopupView *permanentPopUpView = [[BEMPermanentPopupView alloc] initWithFrame:CGRectMake(0, 0, permanentPopUpLabel.frame.size.width + 7, permanentPopUpLabel.frame.size.height + 2)];
-    permanentPopUpView.backgroundColor = [UIColor whiteColor];
-    permanentPopUpView.alpha = 0;
-    permanentPopUpView.layer.cornerRadius = 3;
-    permanentPopUpView.tag = PermanentPopUpViewTag3100;
-    permanentPopUpView.center = permanentPopUpLabel.center;
     
-    if (permanentPopUpLabel.frame.origin.x <= 0) {
-        self.xCenterLabel = permanentPopUpLabel.frame.size.width/2 + 4;
-        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y - circleDot.frame.size.height/2 - 15);
-    } else if (self.enableYAxisLabel == YES && permanentPopUpLabel.frame.origin.x <= self.YAxisLabelXOffset) {
-        self.xCenterLabel = permanentPopUpLabel.frame.size.width/2 + 4;
-        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel + self.YAxisLabelXOffset, circleDot.center.y - circleDot.frame.size.height/2 - 15);
-    } else if ((permanentPopUpLabel.frame.origin.x + permanentPopUpLabel.frame.size.width) >= self.frame.size.width) {
-        self.xCenterLabel = self.frame.size.width - permanentPopUpLabel.frame.size.width/2 - 4;
-        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y - circleDot.frame.size.height/2 - 15);
-    }
     
-    if (permanentPopUpLabel.frame.origin.y <= 2) {
-        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y + circleDot.frame.size.height/2 + 15);
-    }
+    UIView *connectorLine = [[UIView alloc] init];
+    connectorLine.backgroundColor = [UIColor whiteColor];
+    connectorLine.center = CGPointMake(self.xCenterLabel, 30);
+    CGRect newFrame = connectorLine.frame;
+    newFrame.size.width = 0.5;
+    CGFloat distance = (circleDot.frame.origin.y -  self.frame.origin.y) + circleDot.frame.size.height ;
+    newFrame.size.height = distance;
+    [connectorLine setFrame:newFrame];
     
-    if ([self checkOverlapsForView:permanentPopUpView] == YES) {
-        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y + circleDot.frame.size.height/2 + 15);
-    }
     
-    permanentPopUpView.center = permanentPopUpLabel.center;
-    
-    [self addSubview:permanentPopUpView];
+    //    if (permanentPopUpLabel.frame.origin.x <= 0) {
+    //        self.xCenterLabel = permanentPopUpLabel.frame.size.width/2 + 4;
+    //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y - circleDot.frame.size.height/2 - 15);
+    //    } else if (self.enableYAxisLabel == YES && permanentPopUpLabel.frame.origin.x <= self.YAxisLabelXOffset) {
+    //        self.xCenterLabel = permanentPopUpLabel.frame.size.width/2 + 4;
+    //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel + self.YAxisLabelXOffset, circleDot.center.y - circleDot.frame.size.height/2 - 15);
+    //    } else if ((permanentPopUpLabel.frame.origin.x + permanentPopUpLabel.frame.size.width) >= self.frame.size.width) {
+    //        self.xCenterLabel = self.frame.size.width - permanentPopUpLabel.frame.size.width/2 - 4;
+    //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y - circleDot.frame.size.height/2 - 15);
+    //    }
+    //
+    //    if (permanentPopUpLabel.frame.origin.y <= 2) {
+    //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y + circleDot.frame.size.height/2 + 15);
+    //    }
+    //
+    //    if ([self checkOverlapsForView:permanentPopUpView] == YES) {
+    //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y + circleDot.frame.size.height/2 + 15);
+    //    }
+    //
+    [self addSubview:connectorLine];
     [self addSubview:permanentPopUpLabel];
+    [self sendSubviewToBack:connectorLine];
+    connectorLine.alpha = 0;
+    
     
     if (self.animationGraphEntranceTime == 0) {
         permanentPopUpLabel.alpha = 1;
-        permanentPopUpView.alpha = 0.7;
+        connectorLine.alpha = 0.7;
     } else {
         [UIView animateWithDuration:0.5 delay:self.animationGraphEntranceTime options:UIViewAnimationOptionCurveLinear animations:^{
             permanentPopUpLabel.alpha = 1;
-            permanentPopUpView.alpha = 0.7;
+            connectorLine.alpha = 0.7;
         } completion:nil];
     }
+    
 }
 
 - (BOOL)checkOverlapsForView:(UIView *)view {
@@ -1166,7 +1182,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         [subviews removeFromSuperview];
     }
     [self drawGraph];
-//    [self setNeedsLayout];
+    //    [self setNeedsLayout];
 }
 
 #pragma mark - Calculations
@@ -1326,7 +1342,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             if (self.enablePopUpReport == YES) {
                 self.popUpView.alpha = 0;
                 self.popUpLabel.alpha = 0;
-//                self.customPopUpView.alpha = 0;
+                //                self.customPopUpView.alpha = 0;
             }
         } completion:nil];
     }
@@ -1342,14 +1358,14 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     self.popUpView.center = CGPointMake(self.xCenterLabel, self.yCenterLabel);
     self.popUpLabel.center = self.popUpView.center;
     int index = (int)(closestDot.tag - DotFirstTag100);
-
+    
     if ([self.delegate respondsToSelector:@selector(lineGraph:modifyPopupView:forIndex:)]) {
         [self.delegate lineGraph:self modifyPopupView:self.popUpView forIndex:index];
     }
     self.xCenterLabel = closestDot.center.x;
     self.yCenterLabel = closestDot.center.y - closestDot.frame.size.height/2 - 15;
     self.popUpView.center = CGPointMake(self.xCenterLabel, self.yCenterLabel);
-
+    
     self.popUpView.alpha = 1.0;
     
     CGPoint popUpViewCenter = CGPointZero;
@@ -1377,7 +1393,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         self.yCenterLabel = closestDot.center.y + closestDot.frame.size.height/2 + 15;
         popUpViewCenter = CGPointMake(self.xCenterLabel, closestDot.center.y + closestDot.frame.size.height/2 + 15);
     }
-
+    
     if (!CGPointEqualToPoint(popUpViewCenter, CGPointZero)) {
         self.popUpView.center = popUpViewCenter;
     }
@@ -1509,10 +1525,10 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     if (padding > 90.0) {
         padding = 90.0;
     }
-
+    
     if ([self.delegate respondsToSelector:@selector(staticPaddingForLineGraph:)])
         padding = [self.delegate staticPaddingForLineGraph:self];
-
+    
     if (self.enableXAxisLabel) {
         if ([self.dataSource respondsToSelector:@selector(lineGraph:labelOnXAxisForIndex:)] || [self.dataSource respondsToSelector:@selector(labelOnXAxisForIndex:)]) {
             if ([xAxisLabels count] > 0) {
