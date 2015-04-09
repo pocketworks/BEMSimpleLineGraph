@@ -170,6 +170,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     _enableYAxisLabel = NO;
     _YAxisLabelXOffset = 0;
     _autoScaleYAxis = YES;
+    _hideEdgePoints = NO;
     _alwaysDisplayDots = NO;
     _alwaysDisplayPopUpLabels = NO;
     _enableLeftReferenceAxisFrameLine = YES;
@@ -468,6 +469,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     // Loop through each point and add it to the graph
     @autoreleasepool {
         for (int i = 0; i < numberOfPoints; i++) {
+
             CGFloat dotValue = 0;
             
 #if !TARGET_INTERFACE_BUILDER
@@ -496,6 +498,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             [dataPoints addObject:@(dotValue)];
             
+            
             if (self.positionYAxisRight) {
                 positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - 1)) * i);
             } else {
@@ -506,10 +509,13 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             [yAxisValues addObject:@(positionOnYAxis)];
             
+            if (self.hideEdgePoints && (i==0 || i == numberOfPoints - 1)){
+                continue;
+            }
             
             // If we're dealing with an null value, don't draw the dot
             
-            if (dotValue >= 0.0 && dotValue != BEMNullGraphValue  ) {
+            if (dotValue != BEMNullGraphValue  ) {
                 BEMCircle *circleDot = [[BEMCircle alloc] initWithFrame:CGRectMake(0, 0, self.sizePoint, self.sizePoint)];
                 circleDot.center = CGPointMake(positionOnXAxis, positionOnYAxis);
                 circleDot.tag = i+ DotFirstTag100;

@@ -326,6 +326,10 @@ IB_DESIGNABLE @interface BEMSimpleLineGraphView : UIView <UIGestureRecognizerDel
 @property (nonatomic) BOOL interpolateNullValues;
 
 
+@property (nonatomic) BOOL hideEdgePoints;
+
+
+
 @end
 
 
