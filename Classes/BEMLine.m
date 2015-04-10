@@ -133,7 +133,6 @@
     CGPoint p3;
     CGFloat tensionBezier1 = 0.3;
     CGFloat tensionBezier2 = 0.3;
-    CGFloat xIndexScale = self.frame.size.width/([self.arrayOfPoints count] - 1);
     
     if (self.xAxisBackgroundColor == self.bottomColor && self.xAxisBackgroundAlpha == self.bottomAlpha) {
         [fillBottom moveToPoint:CGPointMake(self.frame.size.width, self.frame.size.height)];
@@ -157,6 +156,22 @@
     
     NSMutableArray *points = [NSMutableArray arrayWithCapacity:self.arrayOfPoints.count];
     for (int i = 0; i < self.arrayOfPoints.count; i++) {
+        CGFloat indexForPoint = 1;
+        if (self.hideEdgePoints == YES) {
+            if (i == 0 || i == 1){
+                indexForPoint = -1.5;
+            }else if (i ==2 ) {
+                indexForPoint = 0.5;
+            }
+            else if (i == [self.arrayOfPoints count] - 2 ) {
+                indexForPoint = 1.5;
+            }else {
+                indexForPoint = 1.2;
+            }
+        }
+        
+        CGFloat xIndexScale = self.frame.size.width/([self.arrayOfPoints count] - indexForPoint);
+
         CGPoint value = CGPointMake(xIndexScale * i, [self.arrayOfPoints[i] CGFloatValue]);
         if (value.y != BEMNullGraphValue || !self.interpolateNullValues) {
             [points addObject:[NSValue valueWithCGPoint:value]];
