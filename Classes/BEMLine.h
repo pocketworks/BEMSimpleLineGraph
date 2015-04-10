@@ -171,6 +171,8 @@ typedef NS_ENUM(NSUInteger, BEMLineGradientDirection) {
 /// The offset dependant on the size of the labels to create the frame
 @property (nonatomic) CGFloat frameOffset;
 
+@property (nonatomic) BOOL hideEdgePoints;
+
 
 
 @end

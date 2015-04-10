@@ -231,7 +231,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     }
     self.currentViewSize = self.bounds.size;
     
-    [self drawGraph];
+    [self reloadGraph];
     
 }
 
@@ -500,7 +500,20 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             
             if (self.positionYAxisRight) {
-                positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - 1)) * i);
+                CGFloat indexForPoint = 1;
+                if (self.hideEdgePoints == YES) {
+                    if (i == 0 || i == 1){
+                        indexForPoint = -1.5;
+                    }else if (i ==2 ) {
+                        indexForPoint = 0.5;
+                    }
+                    else if (i == numberOfPoints - 2 ) {
+                        indexForPoint = 1.5;
+                    }else {
+                        indexForPoint = 1.2;
+                    }
+                }
+                positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - indexForPoint)) * i);
             } else {
                 positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - 1)) * i) + self.YAxisLabelXOffset;
             }
@@ -509,7 +522,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             [yAxisValues addObject:@(positionOnYAxis)];
             
-            if (self.hideEdgePoints && (i==0 || i == numberOfPoints - 1)){
+            if (self.hideEdgePoints == YES && (i==0 || i == numberOfPoints - 1)){
                 continue;
             }
             
@@ -522,6 +535,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
                 circleDot.alpha = 0;
                 circleDot.absoluteValue = dotValue;
                 circleDot.Pointcolor = self.colorPoint;
+
                 
                 [self addSubview:circleDot];
                 if (self.alwaysDisplayPopUpLabels == YES) {
@@ -542,7 +556,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
                 } else {
                     if (self.displayDotsWhileAnimating) {
                         [UIView animateWithDuration:(float)self.animationGraphEntranceTime/numberOfPoints delay:(float)i*((float)self.animationGraphEntranceTime/numberOfPoints) options:UIViewAnimationOptionCurveLinear animations:^{
-                            circleDot.alpha = 0.7;
+                            circleDot.alpha = 1;
                             
                         } completion:^(BOOL finished) {
                             if (self.alwaysDisplayDots == NO) {
@@ -579,7 +593,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         line = [[BEMLine alloc] initWithFrame:CGRectMake(self.YAxisLabelXOffset, 0, self.frame.size.width - self.YAxisLabelXOffset, self.frame.size.height)];
     }
     
-    
+    line.hideEdgePoints = self.hideEdgePoints;
     line.opaque = NO;
     line.alpha = 1;
     line.backgroundColor = [UIColor clearColor];
@@ -1113,11 +1127,11 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     
     UIView *connectorLine = [[UIView alloc] init];
     connectorLine.backgroundColor = [UIColor whiteColor];
-    connectorLine.center = CGPointMake(self.xCenterLabel, 30);
+    connectorLine.center = CGPointMake(self.xCenterLabel, 40);
     CGRect newFrame = connectorLine.frame;
     newFrame.size.width = 0.5;
     CGFloat distance = (circleDot.frame.origin.y -  self.frame.origin.y) + circleDot.frame.size.height ;
-    newFrame.size.height = distance;
+    newFrame.size.height = distance-10;
     [connectorLine setFrame:newFrame];
     
     

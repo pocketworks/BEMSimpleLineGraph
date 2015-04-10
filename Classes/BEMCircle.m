@@ -15,16 +15,19 @@
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
-        self.backgroundColor = [UIColor clearColor];
+        [self.layer setCornerRadius:self.frame.size.width/2];
+        self.layer.borderColor = [UIColor whiteColor].CGColor;
+        self.layer.borderWidth = 1;
     }
     return self;
 }
 
-- (void)drawRect:(CGRect)rect {
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    CGContextAddEllipseInRect(ctx, rect);
-    [self.Pointcolor set];
-    CGContextFillPath(ctx);
+-(void) layoutSubviews {
+    self.backgroundColor = self.Pointcolor ;
+    
 }
+
+
+
 
 @end
