@@ -328,7 +328,9 @@ IB_DESIGNABLE @interface BEMSimpleLineGraphView : UIView <UIGestureRecognizerDel
 
 @property (nonatomic) BOOL hideEdgePoints;
 
+@property (nonatomic) BOOL hideDotsForZero;
 
+@property (nonatomic) BOOL useSmallerLabelLines;
 
 @end
 

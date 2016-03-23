@@ -551,12 +551,21 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
                     if (self.alwaysDisplayDots == NO) {
                         circleDot.alpha = 0;  // never reach here
                     } else {
+                      if (self.hideDotsForZero && dotValue == 0){
+                        circleDot.alpha = 0;
+                      }else{
                         circleDot.alpha = 0.7;
+                      }
+                      
                     }
                 } else {
                     if (self.displayDotsWhileAnimating) {
                         [UIView animateWithDuration:(float)self.animationGraphEntranceTime/numberOfPoints delay:(float)i*((float)self.animationGraphEntranceTime/numberOfPoints) options:UIViewAnimationOptionCurveLinear animations:^{
+                          if (self.hideDotsForZero && dotValue == 0){
+                            circleDot.alpha = 0;
+                          }else{
                             circleDot.alpha = 1;
+                          }
                             
                         } completion:^(BOOL finished) {
                             if (self.alwaysDisplayDots == NO) {
@@ -1127,11 +1136,20 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     
     UIView *connectorLine = [[UIView alloc] init];
     connectorLine.backgroundColor = [UIColor whiteColor];
-    connectorLine.center = CGPointMake(self.xCenterLabel, 40);
-    CGRect newFrame = connectorLine.frame;
-    newFrame.size.width = 0.5;
+  
+    CGRect newFrame;
+  
     CGFloat distance = (circleDot.frame.origin.y -  self.frame.origin.y) + circleDot.frame.size.height ;
-    newFrame.size.height = distance-10;
+    if (!self.useSmallerLabelLines){
+      connectorLine.center = CGPointMake(self.xCenterLabel, 40);
+       newFrame = connectorLine.frame;
+      newFrame.size.height = distance-10;
+    }else{
+      connectorLine.center = CGPointMake(self.xCenterLabel, 60);
+       newFrame = connectorLine.frame;
+      newFrame.size.height = distance-60;
+    }
+    newFrame.size.width = 0.5;
     [connectorLine setFrame:newFrame];
     
     
@@ -1154,6 +1172,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     //        permanentPopUpLabel.center = CGPointMake(self.xCenterLabel, circleDot.center.y + circleDot.frame.size.height/2 + 15);
     //    }
     //
+
     [self addSubview:connectorLine];
     [self addSubview:permanentPopUpLabel];
     [self sendSubviewToBack:connectorLine];
@@ -1162,14 +1181,23 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     
     if (self.animationGraphEntranceTime == 0) {
         permanentPopUpLabel.alpha = 1;
-        connectorLine.alpha = 0.7;
+        if (self.hideDotsForZero && value.doubleValue == 0){
+          connectorLine.alpha = 0;
+        }else{
+          connectorLine.alpha = 0.7;
+        }
+      
     } else {
         [UIView animateWithDuration:0.5 delay:self.animationGraphEntranceTime options:UIViewAnimationOptionCurveLinear animations:^{
-            permanentPopUpLabel.alpha = 1;
+           permanentPopUpLabel.alpha = 1;
+          if (self.hideDotsForZero && value.doubleValue == 0){
+            connectorLine.alpha = 0;
+          }else{
             connectorLine.alpha = 0.7;
+          }
         } completion:nil];
     }
-    
+  
 }
 
 - (BOOL)checkOverlapsForView:(UIView *)view {
