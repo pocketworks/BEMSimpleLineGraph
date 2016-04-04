@@ -501,18 +501,6 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             if (self.positionYAxisRight) {
                 CGFloat indexForPoint = 1;
-                if (self.hideEdgePoints == YES) {
-                    if (i == 0 || i == 1){
-                        indexForPoint = -1.5;
-                    }else if (i ==2 ) {
-                        indexForPoint = 0.5;
-                    }
-                    else if (i == numberOfPoints - 2 ) {
-                        indexForPoint = 1.5;
-                    }else {
-                        indexForPoint = 1.2;
-                    }
-                }
                 positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - indexForPoint)) * i);
             } else {
                 positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - 1)) * i) + self.YAxisLabelXOffset;
