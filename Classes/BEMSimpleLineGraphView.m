@@ -128,6 +128,11 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
     return self;
 }
 
+- (void)setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+}
+
 - (void)commonInit {
     // Do any initialization that's common to both -initWithFrame: and -initWithCoder: in this method
     
@@ -501,7 +506,8 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
             
             if (self.positionYAxisRight) {
                 CGFloat indexForPoint = 1;
-                positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - indexForPoint)) * i);
+                CGFloat segmentWidth = self.frame.size.width / (numberOfPoints - 2);
+                positionOnXAxis = segmentWidth * (i - indexForPoint) + (segmentWidth / 2);
             } else {
                 positionOnXAxis = (((self.frame.size.width - self.YAxisLabelXOffset) / (numberOfPoints - 1)) * i) + self.YAxisLabelXOffset;
             }
@@ -590,7 +596,7 @@ typedef NS_ENUM(NSInteger, BEMInternalTags)
         line = [[BEMLine alloc] initWithFrame:CGRectMake(self.YAxisLabelXOffset, 0, self.frame.size.width - self.YAxisLabelXOffset, self.frame.size.height)];
     }
     
-    line.hideEdgePoints = self.hideEdgePoints;
+    //line.hideEdgePoints = self.hideEdgePoints;
     line.opaque = NO;
     line.alpha = 1;
     line.backgroundColor = [UIColor clearColor];

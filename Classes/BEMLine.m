@@ -157,22 +157,10 @@
     NSMutableArray *points = [NSMutableArray arrayWithCapacity:self.arrayOfPoints.count];
     for (int i = 0; i < self.arrayOfPoints.count; i++) {
         CGFloat indexForPoint = 1;
-        if (self.hideEdgePoints == YES) {
-            if (i == 0 || i == 1){
-                indexForPoint = -1.5;
-            }else if (i ==2 ) {
-                indexForPoint = 0.5;
-            }
-            else if (i == [self.arrayOfPoints count] - 2 ) {
-                indexForPoint = 1.5;
-            }else {
-                indexForPoint = 1.2;
-            }
-        }
+        CGFloat segmentWidth = self.frame.size.width / ([self.arrayOfPoints count] - 2);
+        CGFloat xIndexScale = segmentWidth * (i - indexForPoint) + (segmentWidth / 2);
         
-        CGFloat xIndexScale = self.frame.size.width/([self.arrayOfPoints count] - indexForPoint);
-
-        CGPoint value = CGPointMake(xIndexScale * i, [self.arrayOfPoints[i] CGFloatValue]);
+        CGPoint value = CGPointMake(xIndexScale, [self.arrayOfPoints[i] CGFloatValue]);
         if (value.y != BEMNullGraphValue || !self.interpolateNullValues) {
             [points addObject:[NSValue valueWithCGPoint:value]];
         }
